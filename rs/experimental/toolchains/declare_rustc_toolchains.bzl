@@ -15,7 +15,8 @@ def declare_rustc_toolchains(
         version,
         edition,
         execs = SUPPORTED_EXEC_TRIPLES,
-        targets = SUPPORTED_TARGET_TRIPLES):
+        targets = SUPPORTED_TARGET_TRIPLES,
+        extra_rustc_flags_triples = {}):
     """Declare toolchains for all supported target platforms."""
 
     version_key = sanitize_version(version)
@@ -37,11 +38,13 @@ def declare_rustc_toolchains(
 
         rust_std_select = {}
         target_triple_select = {}
+        extra_rustc_flags_select = {}
         for target_triple in targets:
             target_key = sanitize_triple(target_triple)
             config_label = "@rules_rs//rs/experimental/platforms/config:{}".format(target_triple)
             rust_std_select[config_label] = "@rust_stdlib_{}_{}//:rust_std-{}".format(target_key, version_key, target_triple)
             target_triple_select[config_label] = target_triple
+            extra_rustc_flags_select[config_label] = extra_rustc_flags_triples.get(target_triple, [])
 
         rust_toolchain(
             name = rust_toolchain_name,
@@ -82,6 +85,7 @@ def declare_rustc_toolchains(
             default_edition = edition,
             exec_triple = triple,
             target_triple = select(target_triple_select),
+            extra_rustc_flags = select(extra_rustc_flags_select),
             visibility = ["//visibility:public"],
             tags = ["rust_version={}".format(version)],
         )

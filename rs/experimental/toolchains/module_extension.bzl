@@ -69,6 +69,9 @@ _TOOLCHAIN_TAG = tag_class(
             doc = "Default edition to apply to toolchains.",
             default = _DEFAULT_EDITION,
         ),
+        "extra_rustc_flags_triples": attr.string_list_dict(
+            doc = "Extra flags to pass to rustc per target triple, e.g. {\"wasm32-unknown-unknown\": [\"-Ctarget-cpu=mvp\"]}.",
+        ),
     },
 )
 
@@ -271,6 +274,7 @@ def _toolchains_impl(mctx):
                 version = tag.version,
                 rustfmt_version = rustfmt_version,
                 edition = tag.edition,
+                extra_rustc_flags_triples = tag.extra_rustc_flags_triples,
             )
         is_dev_dependency = had_tags and mctx.is_dev_dependency(tag)
         if is_dev_dependency:

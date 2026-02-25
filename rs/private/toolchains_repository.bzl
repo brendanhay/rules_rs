@@ -8,6 +8,7 @@ load("@rules_rs//rs/experimental/toolchains:declare_rustfmt_toolchains.bzl", "de
 declare_rustc_toolchains(
     version = {version},
     edition = {edition},
+    extra_rustc_flags_triples = {extra_rustc_flags_triples},
 )
 
 declare_rustfmt_toolchains(
@@ -19,6 +20,7 @@ declare_rustfmt_toolchains(
             version = repr(rctx.attr.version),
             rustfmt_version = repr(rctx.attr.rustfmt_version),
             edition = repr(rctx.attr.edition),
+            extra_rustc_flags_triples = repr(dict(rctx.attr.extra_rustc_flags_triples)),
         ),
     )
 
@@ -30,5 +32,6 @@ toolchains_repository = repository_rule(
         "version": attr.string(mandatory = True),
         "rustfmt_version": attr.string(mandatory = True),
         "edition": attr.string(mandatory = True),
+        "extra_rustc_flags_triples": attr.string_list_dict(),
     },
 )
