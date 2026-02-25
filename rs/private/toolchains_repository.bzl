@@ -9,6 +9,7 @@ declare_rustc_toolchains(
     version = {version},
     edition = {edition},
     extra_rustc_flags_triples = {extra_rustc_flags_triples},
+    extra_rustc_flags = {extra_rustc_flags},
 )
 
 declare_rustfmt_toolchains(
@@ -21,6 +22,7 @@ declare_rustfmt_toolchains(
             rustfmt_version = repr(rctx.attr.rustfmt_version),
             edition = repr(rctx.attr.edition),
             extra_rustc_flags_triples = repr(dict(rctx.attr.extra_rustc_flags_triples)),
+            extra_rustc_flags = repr(list(rctx.attr.extra_rustc_flags)),
         ),
     )
 
@@ -33,5 +35,6 @@ toolchains_repository = repository_rule(
         "rustfmt_version": attr.string(mandatory = True),
         "edition": attr.string(mandatory = True),
         "extra_rustc_flags_triples": attr.string_list_dict(),
+        "extra_rustc_flags": attr.string_list(),
     },
 )
