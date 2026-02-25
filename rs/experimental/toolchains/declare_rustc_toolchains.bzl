@@ -61,17 +61,36 @@ def declare_rustc_toolchains(
             allocator_library = None,
             global_allocator_library = None,
             binary_ext = select({
-                "@platforms//os:none": ".wasm",
+                # wasm32-unknown-unknown: cpu:wasm32 + os:none. More specific
+                # than the os:none arm, so Bazel picks this entry for wasm32.
+                # Bare-metal targets (ARM, RISC-V, x86_64-none) fall through to
+                # os:none and get "". Matches rules_rust triple_mappings.bzl:
+                # unknown -> ".wasm", none -> "".
+                "@rules_rs//rs/experimental/platforms/config:wasm32-unknown-unknown": ".wasm",
+                "@platforms//os:none": "",
                 "@platforms//os:windows": ".exe",
                 "//conditions:default": "",
             }),
             staticlib_ext = select({
-                "@platforms//os:none": "",
+                # wasm32-unknown-unknown does not produce a usable static lib.
+                # Bare-metal (none) targets use .a. Matches rules_rust:
+                # unknown -> "", none -> ".a".
+                "@rules_rs//rs/experimental/platforms/config:wasm32-unknown-unknown": "",
+                "@platforms//os:none": ".a",
                 "@platforms//os:windows": ".lib",
                 "//conditions:default": ".a",
             }),
             dylib_ext = select({
-                "@platforms//os:none": "",
+                # wasm32 cdylib output uses .wasm. The per-triple config_setting
+                # (cpu:wasm32 + os:none) is more specific than os:none alone, so
+                # Bazel picks it for wasm32-unknown-unknown while bare-metal
+                # targets (ARM, RISC-V, x86_64-none) fall through to os:none.
+                # Empty string is falsy in Starlark and breaks determine_lib_name
+                # in rules_rust before it reaches the wasm32 cdylib prefix check.
+                # Matches rules_rust: unknown -> ".wasm", none -> ".so".
+                "@rules_rs//rs/experimental/platforms/config:wasm32-unknown-unknown": ".wasm",
+                "@platforms//os:wasi": ".wasm",
+                "@platforms//os:none": ".so",
                 "@platforms//os:windows": ".dll",
                 "@platforms//os:macos": ".dylib",
                 "//conditions:default": ".so",
