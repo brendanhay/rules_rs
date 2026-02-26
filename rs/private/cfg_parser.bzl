@@ -149,7 +149,7 @@ def _normalize_os(os_raw):
         return "macos"
     return os_raw
 
-def _family_for_os(os_name):
+def _family_for_triple(arch, os_name):
     if os_name == "windows":
         return "windows"
     if os_name in [
@@ -157,6 +157,10 @@ def _family_for_os(os_name):
         "android", "solaris", "illumos", "aix", "haiku", "hurd",
     ]:
         return "unix"
+    # wasm32-unknown-unknown has target_family = "wasm". The family is derived
+    # from the arch, not the OS field ("unknown"), so check arch explicitly.
+    if arch.startswith("wasm"):
+        return "wasm"
     return ""
 
 def _pointer_width_for_arch(arch):
@@ -199,7 +203,7 @@ def triple_to_cfg_attrs(triple, features, target_features):
     os_raw_part = _get(parts, 2, "none")
     env_part = "-".join(parts[3:])
     os_norm = _normalize_os(os_raw_part)
-    fam = _family_for_os(os_norm)
+    fam = _family_for_triple(arch_part, os_norm)
     width = _pointer_width_for_arch(arch_part)
     endian = _endian_for_arch(arch_part)
     abi_guess = _abi_from_env(env_part)
